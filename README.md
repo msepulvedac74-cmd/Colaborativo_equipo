@@ -1,7 +1,6 @@
 # Colaborativo_equipo
 # Practica2
 Alumnos:
-
 Mauricio Sepúlveda C
 Ricardo González Z
 
@@ -70,7 +69,6 @@ val nombres = scala.collection.mutable.Map(
 
 # Practica4
 Alumnos:
-
 Mauricio Sepúlveda C
 Ricardo González Z
 
