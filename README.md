@@ -157,8 +157,8 @@ println(palindromo(palabra))
 
 En esta función, se alimenta una lista de caracteres. En la variable se utiliza la opción “reverse” para cambiar el orden de los caracteres. Si al cabiar el orden de los caracteres es igual, regresa un valor de true, si por el contrario no es igual, arroja un valor de “false”. En esta función importa si los caracteres son mayúsculas o minúsculas.
 
-#Practica_Ecaluatoria
-#(Nota se copio y pego desde la carpeta "Colaborativo_equipo/unit1/practica_evaluatoria/README.txt")
+# Practica_Ecaluatoria
+# Nota se copio y pego desde la carpeta "Colaborativo_equipo/unit1/practica_evaluatoria/README.txt"
 
 1. Comienza una simple sesión Spark.
 -Crea una carpeta para poder clonar la dirección de Git Hub
