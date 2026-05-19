@@ -91,8 +91,6 @@ scala> dataset.select("features","label").show()
 
 //Train/test
 
-scala>
-
 scala> val Array(trainingData, testData) = dataset.randomSplit(Array(0.7, 0.3), seed = 42)
 val trainingData: org.apache.spark.sql.Dataset[org.apache.spark.sql.Row] = [income_high: double, has_debt: double ... 3 more fields]
 val testData: org.apache.spark.sql.Dataset[org.apache.spark.sql.Row] = [income_high: double, has_debt: double ... 3 more fields]
@@ -172,5 +170,3 @@ val accuracy: Double = 0.6666666666666666
 
 scala> println("Accuracy = " + accuracy)
 Accuracy = 0.6666666666666666
-
-scala>

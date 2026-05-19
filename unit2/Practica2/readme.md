@@ -153,4 +153,3 @@ scala> println(metrics.confusionMatrix)
 scala> metrics.accuracy
 val res9: Double = 0.9825783972125436
 
-scala>
