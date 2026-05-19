@@ -32,7 +32,6 @@ scala> val data = Seq(
      | ).toDF("income_high","has_debt","good_history","label")
 val data: org.apache.spark.sql.DataFrame = [income_high: double, has_debt: double ... 2 more fields]
 
-scala>
 
 scala> data.show()
 +-----------+--------+------------+-----+

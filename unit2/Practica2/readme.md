@@ -46,8 +46,6 @@ val firstrow: org.apache.spark.sql.Row = [68.95,35,61833.9,256.09,Cloned 5thgene
 
 scala> println("\n")
 
-
-
 scala> println("Example data row")
 Example data row
 
@@ -59,10 +57,8 @@ scala> for(ind <- Range(1, colnames.length)){
 Age
 35
 
-
 Area Income
 61833.9
-
 
 Daily Internet Usage
 256.09
