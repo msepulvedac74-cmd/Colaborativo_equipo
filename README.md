@@ -381,6 +381,169 @@ scala> monthavgs.select($"Month",$"avg(Close)").show()
 |    2| 254.1954634020619|
 +-----+------------------+
 
+# Práctica 1 - Práctica 1 - Regresión Lineal
+
+// Import LinearRegression scala> import org.apache.spark.sql.SparkSession scala> import org.apache.spark.ml.regression.LinearRegression
+
+// Opcional: Utilice el siguiente codigo para configurar errores scala> import org.apache.log4j._ scala> Logger.getLogger("org").setLevel(Level.ERROR)
+
+// Inicie una simple Sesion Spark scala> val spark = SparkSession.builder().getOrCreate() val spark: org.apache.spark.sql.SparkSession = org.apache.spark.sql.classic.SparkSession@7270c811
+
+// Utilice Spark para el archivo csv Clean-Ecommerce . scala> val data = spark.read.option("header","true").option("inferSchema", "true").format("csv").load("Clean-USA-Housing.csv") val data: org.apache.spark.sql.DataFrame = [Avg Area Income: double, Avg Area House Age: double ... 4 more fields]
+
+// Imprima el schema en el DataFrame. scala> data.printSchema warning: 1 deprecation (since 2.13.3); for details, enable :setting -deprecation or :replay -deprecation root |-- Avg Area Income: double (nullable = true) |-- Avg Area House Age: double (nullable = true) |-- Avg Area Number of Rooms: double (nullable = true) |-- Avg Area Number of Bedrooms: double (nullable = true) |-- Area Population: double (nullable = true) |-- Price: double (nullable = true)
+
+// Imprima un renglon de ejemplo del DataFrane. scala> data.head(1) val res23: Array[org.apache.spark.sql.Row] = Array([79545.45857431678,5.682861321615587,7.009188142792237,4.09,23086.800502686456,1059033.5578701235])
+
+scala> val colnames = data.columns val colnames: Array[String] = Array(Avg Area Income, Avg Area House Age, Avg Area Number of Rooms, Avg Area Number of Bedrooms, Area Population, Price)
+
+scala> val firstrow = data.head(1)(0) val firstrow: org.apache.spark.sql.Row = [79545.45857431678,5.682861321615587,7.009188142792237,4.09,23086.800502686456,1059033.5578701235]
+
+scala> println("\n")
+
+scala> println("Example data row") Example data row
+
+scala> for(ind <- Range(1, colnames.length)){ | println(colnames(ind)) | println(firstrow(ind)) | println("\n") | } Avg Area House Age 5.682861321615587
+
+Avg Area Number of Rooms 7.009188142792237
+
+Avg Area Number of Bedrooms 4.09
+
+Area Population 23086.800502686456
+
+Price 1059033.5578701235
+
+scala> import org.apache.spark.ml.feature.VectorAssembler import org.apache.spark.ml.feature.VectorAssembler
+
+// Importe VectorAssembler y Vectors scala> import org.apache.spark.ml.linalg.Vectors
+
+scala>
+
+scala> data.columns val res27: Array[String] = Array(Avg Area Income, Avg Area House Age, Avg Area Number of Rooms, Avg Area Number of Bedrooms, Area Population, Price)
+
+// Deje todo esto como un nuevo DataFrame que se llame df
+
+scala> val df = data.select(data("Price").as("label"), 
+"
+A
+v
+g
+A
+r
+e
+a
+I
+n
+c
+o
+m
+e
+"
+,
+"Avg Area House Age", 
+"
+A
+v
+g
+A
+r
+e
+a
+N
+u
+m
+b
+e
+r
+o
+f
+R
+o
+o
+m
+s
+"
+,
+"Avg Area Number of Bedrooms", $"Area Population") val df: org.apache.spark.sql.DataFrame = [label: double, Avg Area Income: double ... 4 more fields]
+
+// Transforme el data frame para que tome la forma de ("label","features") scala> //val df = data.select(data("Price").as"label"), 
+"
+A
+v
+g
+A
+r
+e
+a
+I
+n
+c
+o
+m
+e
+"
+,
+"Avg Area House Age", 
+"
+A
+v
+g
+A
+r
+e
+a
+N
+u
+m
+b
+e
+r
+o
+f
+R
+o
+o
+m
+s
+"
+,
+"Avg Area Number of Bedrooms", $"Area Population")
+
+// Que el objeto assembler convierta los valores de entrada a un vector
+
+scala> val assembler = new VectorAssembler().setInputCols(Array("Avg Area Income", "Avg Area House Age", "Avg Area Number of Rooms", "Avg Area Number of Bedrooms", "Area Population")).setOutputCol("features") val assembler: org.apache.spark.ml.feature.VectorAssembler = VectorAssembler: uid=vecAssembler_967e51d72036, handleInvalid=error, numInputCols=5
+
+scala> val output = assembler.transform(df).select(
+"
+l
+a
+b
+e
+l
+"
+,
+"features") val output: org.apache.spark.sql.DataFrame = [label: double, features: vector]
+
+scala>
+
+scala> output.show() +------------------+--------------------+ | label| features| +------------------+--------------------+ |1059033.5578701235|[79545.4585743167...| | 1505890.91484695|[79248.6424548256...| |1058987.9878760849|[61287.0671786567...| |1260616.8066294468|[63345.2400462279...| | 630943.4893385402|[59982.1972257080...| |1068138.0743935304|[80175.7541594853...| |1502055.8173744078|[64698.4634278877...| |1573936.5644777215|[78394.3392775308...| | 798869.5328331633|[59927.6608133496...| |1545154.8126419624|[81885.9271840956...| | 1707045.722158058|[80527.4720829228...| | 663732.3968963273|[50593.6954970428...| |1042814.0978200928|[39033.8092369823...| |1291331.5184858206|[73163.6634410467...| |1402818.2101658515|[69391.3801843616...| |1306674.6599511993|[73091.8667458232...| |1556786.6001947748|[79706.9630576574...| | 528485.2467305964|[61929.0770180892...| |1019425.9367578316|[63508.1942994299...| |1030591.4292116085|[62085.2764034048...| +------------------+--------------------+ only showing top 20 rows
+
+// Crear un objeto para modelo de regresion linea.
+
+scala> val lr = new LinearRegression() val lr: org.apache.spark.ml.regression.LinearRegression = linReg_679d8a16a963
+
+// Ajuste el modelo para los datos y llame a este modelo lrModelo scala> val lrModel = lr.fit(output) val lrModel: org.apache.spark.ml.regression.LinearRegressionModel = LinearRegressionModel: uid=linReg_679d8a16a963, numFeatures=5
+
+// Resuma el modelo sobre el conjunto de entrenamiento imprima la salida de algunas metricas! // Utilize metodo .summary de nuestro modelo para crear un objeto llamado trainingSummary scala> val trainingSummary = lrModel.summary val trainingSummary: org.apache.spark.ml.regression.LinearRegressionTrainingSummary = org.apache.spark.ml.regression.LinearRegressionTrainingSummary@7b15de86
+
+// Muestre los valores de residuals, el RMSE, el MSE, y tambien el R^2 . scala> trainingSummary.residuals.show() +-------------------+ | residuals| +-------------------+ |-164813.48488342343| | 10953.223229613388| | -194028.7582053577| | 139392.73897870956| |-214445.27695672144| | -701.0813313485123| | -168103.7946608388| | 3974.217703607166| | 32978.449035998085| | 76897.3040503161| | -66939.03875315515| | 34017.77569352917| | 91027.54522960435| |-14496.722959607607| | 96010.27173951524| | 67115.24134960677| | 34045.648309225915| | 40333.55834060407| |-117424.29344359622| | -170059.0470152503| +-------------------+ only showing top 20 rows
+
+scala> trainingSummary.predictions.show() +------------------+--------------------+------------------+ | label| features| prediction| +------------------+--------------------+------------------+ |1059033.5578701235|[79545.4585743167...| 1223847.042753547| | 1505890.91484695|[79248.6424548256...|1494937.6916173366| |1058987.9878760849|[61287.0671786567...|1253016.7460814426| |1260616.8066294468|[63345.2400462279...|1121224.0676507372| | 630943.4893385402|[59982.1972257080...| 845388.7662952617| |1068138.0743935304|[80175.7541594853...| 1068839.155724879| |1502055.8173744078|[64698.4634278877...|1670159.6120352466| |1573936.5644777215|[78394.3392775308...|1569962.3467741143| | 798869.5328331633|[59927.6608133496...| 765891.0837971652| |1545154.8126419624|[81885.9271840956...|1468257.5085916463| | 1707045.722158058|[80527.4720829228...|1773984.7609112132| | 663732.3968963273|[50593.6954970428...| 629714.6212027981| |1042814.0978200928|[39033.8092369823...| 951786.5525904885| |1291331.5184858206|[73163.6634410467...|1305828.2414454282| |1402818.2101658515|[69391.3801843616...|1306807.9384263363| |1306674.6599511993|[73091.8667458232...|1239559.4186015925| |1556786.6001947748|[79706.9630576574...| 1522740.951885549| | 528485.2467305964|[61929.0770180892...|488151.68838999234| |1019425.9367578316|[63508.1942994299...|1136850.2302014278| |1030591.4292116085|[62085.2764034048...|1200650.4762268588| +------------------+--------------------+------------------+ only showing top 20 rows
+
+scala> trainingSummary.r2 //variaza que hay val res31: Double = 0.9180238195089547
+
+scala> trainingSummary.rootMeanSquaredError val res32: Double = 101092.70158252298
+
 # Práctica 2 - Regresión Logística
 
 scala> import org.apache.spark.ml.classification.LogisticRegression
@@ -537,3 +700,201 @@ scala> metrics.accuracy
 val res9: Double = 0.9825783972125436
 
 scala>
+
+# Práctica 3 - Multilayer Perceptron Classifier
+
+scala> import org.apache.spark.ml.classification.MultilayerPerceptronClassifier import org.apache.spark.ml.classification.MultilayerPerceptronClassifier
+
+scala> import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
+
+scala> // Load the data stored in LIBSVM format as a DataFrame.
+
+scala> val data = spark.read.format("libsvm").load("C:/Spark/data/mllib/sample_multiclass_classification_data.txt") val data: org.apache.spark.sql.DataFrame = [label: double, features: vector]
+
+scala> val Array(training, test) = data.randomSplit(Array(0.6, 0.4), seed = 12345) val training: org.apache.spark.sql.Dataset[org.apache.spark.sql.Row] = [label: double, features: vector] val test: org.apache.spark.sql.Dataset[org.apache.spark.sql.Row] = [label: double, features: vector]
+
+scala> // specify layers for the neural network: scala> // input layer of size 4 (features), two intermediate of size 5 and 4 scala> // and output of size 3 (classes).
+
+scala> val layers = Array[Int](4, 5, 4, 3) val layers: Array[Int] = Array(4, 5, 4, 3)
+
+scala> // create the trainer and set its parameters
+
+scala> val trainer = new MultilayerPerceptronClassifier().setLayers(layers).setBlockSize(128).setSeed(1234L).setMaxIter( 100) val trainer: org.apache.spark.ml.classification.MultilayerPerceptronClassifier = mlpc_f9d2f397cd67
+
+scala> // train the model
+
+scala> val model = trainer.fit(training) val model: org.apache.spark.ml.classification.MultilayerPerceptronClassificationModel = MultilayerPerceptronClassificationModel: uid=mlpc_f9d2f397cd67, numLayers=4, numClasses=3, numFeatures=4
+
+scala> // compute accuracy on the test set
+
+scala> val result = model.transform(test) val result: org.apache.spark.sql.DataFrame = [label: double, features: vector ... 3 more fields]
+
+scala> val predictionAndLabels = result.select("prediction", "label") val predictionAndLabels: org.apache.spark.sql.DataFrame = [prediction: double, label: double]
+
+scala> val evaluator = new MulticlassClassificationEvaluator().setMetricName("accuracy") val evaluator: org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator = MulticlassClassificationEvaluator: uid=mcEval_76060ba3135f, metricName=accuracy, metricLabel=0.0, beta=1.0, eps=1.0E-15
+
+scala> println(s"Test set accuracy = ${evaluator.evaluate(predictionAndLabels)}") Test set accuracy = 0.9607843137254902
+
+# Práctica 4 - Decision Three Classifier
+
+/?Crear spark session scala> import org.apache.spark.sql.SparkSession import org.apache.spark.sql.SparkSession
+
+scala>
+
+scala> val spark = SparkSession.builder() val spark: org.apache.spark.sql.SparkSession.Builder = org.apache.spark.sql.SparkSession$Builder@66c16751
+
+scala> .appName("DecisionTreeCreditExample") val res1: spark.type = org.apache.spark.sql.SparkSession$Builder@66c16751
+
+scala> .getOrCreate() val res2: org.apache.spark.sql.SparkSession = org.apache.spark.sql.classic.SparkSession@63a7a23a
+
+scala>
+
+//Crear dataset val res3: Int = 2
+
+scala> val data = Seq( | (1.0,0.0,1.0,1.0), | (1.0,0.0,1.0,1.0), | (1.0,1.0,1.0,1.0), | (1.0,0.0,0.0,0.0), | (1.0,1.0,0.0,0.0), | (0.0,1.0,0.0,0.0), | (0.0,1.0,0.0,0.0), | (0.0,0.0,1.0,1.0), | (0.0,1.0,1.0,0.0), | (0.0,0.0,0.0,0.0) | ).toDF("income_high","has_debt","good_history","label") val data: org.apache.spark.sql.DataFrame = [income_high: double, has_debt: double ... 2 more fields]
+
+scala> data.show() +-----------+--------+------------+-----+ |income_high|has_debt|good_history|label| +-----------+--------+------------+-----+ | 1.0| 0.0| 1.0| 1.0| | 1.0| 0.0| 1.0| 1.0| | 1.0| 1.0| 1.0| 1.0| | 1.0| 0.0| 0.0| 0.0| | 1.0| 1.0| 0.0| 0.0| | 0.0| 1.0| 0.0| 0.0| | 0.0| 1.0| 0.0| 0.0| | 0.0| 0.0| 1.0| 1.0| | 0.0| 1.0| 1.0| 0.0| | 0.0| 0.0| 0.0| 0.0| +-----------+--------+------------+-----+
+
+//Crear columnas val res5: Int = 3
+
+scala>
+
+scala> import org.apache.spark.ml.feature.VectorAssembler import org.apache.spark.ml.feature.VectorAssembler
+
+scala> val assembler = new VectorAssembler() val assembler: org.apache.spark.ml.feature.VectorAssembler = VectorAssembler: uid=vecAssembler_296ccefcc4c8, handleInvalid=error
+
+scala> .setInputCols(Array("income_high","has_debt","good_history")) val res6: assembler.type = VectorAssembler: uid=vecAssembler_296ccefcc4c8, handleInvalid=error, numInputCols=3
+
+scala> .setOutputCol("features") val res7: res6.type = VectorAssembler: uid=vecAssembler_296ccefcc4c8, handleInvalid=error, numInputCols=3
+
+scala> val dataset = assembler.transform(data) val dataset: org.apache.spark.sql.DataFrame = [income_high: double, has_debt: double ... 3 more fields]
+
+scala> dataset.select("features","label").show() +-------------+-----+ | features|label| +-------------+-----+ |[1.0,0.0,1.0]| 1.0| |[1.0,0.0,1.0]| 1.0| |[1.0,1.0,1.0]| 1.0| |[1.0,0.0,0.0]| 0.0| |[1.0,1.0,0.0]| 0.0| |[0.0,1.0,0.0]| 0.0| |[0.0,1.0,0.0]| 0.0| |[0.0,0.0,1.0]| 1.0| |[0.0,1.0,1.0]| 0.0| | (3,[],[])| 0.0| +-------------+-----+
+
+//Train/test
+
+scala> val Array(trainingData, testData) = dataset.randomSplit(Array(0.7, 0.3), seed = 42) val trainingData: org.apache.spark.sql.Dataset[org.apache.spark.sql.Row] = [income_high: double, has_debt: double ... 3 more fields] val testData: org.apache.spark.sql.Dataset[org.apache.spark.sql.Row] = [income_high: double, has_debt: double ... 3 more fields]
+
+//Crear decision Treee Classifier
+
+scala> import org.apache.spark.ml.classification.DecisionTreeClassifier import org.apache.spark.ml.classification.DecisionTreeClassifier
+
+scala> val dt = new DecisionTreeClassifier() val dt: org.apache.spark.ml.classification.DecisionTreeClassifier = dtc_756b034d865c
+
+scala> .setLabelCol("label") val res11: org.apache.spark.ml.classification.DecisionTreeClassifier = dtc_756b034d865c
+
+scala> .setFeaturesCol("features") val res12: org.apache.spark.ml.classification.DecisionTreeClassifier = dtc_756b034d865c
+
+scala> .setMaxDepth(3) val res13: res12.type = dtc_756b034d865c
+
+//Entrenamiento del modelo
+
+scala> val model = dt.fit(trainingData) val model: org.apache.spark.ml.classification.DecisionTreeClassificationModel = DecisionTreeClassificationModel: uid=dtc_756b034d865c, depth=2, numNodes=5, numClasses=2, numFeatures=3
+
+//mostrar el arbol aprendido
+
+scala> println(model.toDebugString) DecisionTreeClassificationModel: uid=dtc_756b034d865c, depth=2, numNodes=5, numClasses=2, numFeatures=3 If (feature 1 <= 0.5) If (feature 2 <= 0.5) Predict: 0.0 Else (feature 2 > 0.5) Predict: 1.0 Else (feature 1 > 0.5) Predict: 0.0
+
+//predicciones
+
+scala> val predictions = model.transform(testData) val predictions: org.apache.spark.sql.DataFrame = [income_high: double, has_debt: double ... 6 more fields]
+
+scala>
+
+scala> predictions.select("features","label","prediction","probability").show(false) +-------------+-----+----------+-----------+ |features |label|prediction|probability| +-------------+-----+----------+-----------+ |[1.0,0.0,1.0]|1.0 |1.0 |[0.0,1.0] | |[1.0,1.0,1.0]|1.0 |0.0 |[1.0,0.0] | |[1.0,0.0,0.0]|0.0 |0.0 |[1.0,0.0] | +-------------+-----+----------+-----------+
+
+//Evaluacion
+
+scala> import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
+
+scala> val evaluator = new MulticlassClassificationEvaluator() val evaluator: org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator = MulticlassClassificationEvaluator: uid=mcEval_b1d44764806b, metricName=f1, metricLabel=0.0, beta=1.0, eps=1.0E-15
+
+scala> .setLabelCol("label") val res20: evaluator.type = MulticlassClassificationEvaluator: uid=mcEval_b1d44764806b, metricName=f1, metricLabel=0.0, beta=1.0, eps=1.0E-15
+
+scala> .setPredictionCol("prediction") val res21: res20.type = MulticlassClassificationEvaluator: uid=mcEval_b1d44764806b, metricName=f1, metricLabel=0.0, beta=1.0, eps=1.0E-15
+
+scala> .setMetricName("accuracy") val res22: res21.type = MulticlassClassificationEvaluator: uid=mcEval_b1d44764806b, metricName=accuracy, metricLabel=0.0, beta=1.0, eps=1.0E-15
+
+scala> val accuracy = evaluator.evaluate(predictions) val accuracy: Double = 0.6666666666666666
+
+scala> println("Accuracy = " + accuracy) Accuracy = 0.6666666666666666
+
+# Práctica 5 - Random Forest Classifier
+
+scala> import org.apache.spark.mllib.tree.RandomForest import org.apache.spark.mllib.tree.RandomForest
+
+scala> import org.apache.spark.mllib.tree.model.RandomForestModel import org.apache.spark.mllib.tree.model.RandomForestModel
+
+scala> import org.apache.spark.mllib.util.MLUtils import org.apache.spark.mllib.util.MLUtils
+
+// Load and parse the data file.
+
+scala> val data = MLUtils.loadLibSVMFile(sc, "c:/spark/data/mllib/sample_libsvm_data.txt") val data: org.apache.spark.rdd.RDD[org.apache.spark.mllib.regression.LabeledPoint] = MapPartitionsRDD[35] at map at MLUtils.scala:88
+
+// Split the data into training and test sets (30% held out for testing)
+
+scala> val splits = data.randomSplit(Array(0.7, 0.3)) val splits: Array[org.apache.spark.rdd.RDD[org.apache.spark.mllib.regression.LabeledPoint]] = Array(MapPartitionsRDD[36] at randomSplit at :1, MapPartitionsRDD[37] at randomSplit at :1)
+
+scala> val (trainingData, testData) = (splits(0), splits(1)) val trainingData: org.apache.spark.rdd.RDD[org.apache.spark.mllib.regression.LabeledPoint] = MapPartitionsRDD[36] at randomSplit at :1 val testData: org.apache.spark.rdd.RDD[org.apache.spark.mllib.regression.LabeledPoint] = MapPartitionsRDD[37] at randomSplit at :1
+
+// Train a RandomForest model. // Empty categoricalFeaturesInfo indicates all features are continuous.
+
+scala> val numClasses = 2 val numClasses: Int = 2
+
+scala> val categoricalFeaturesInfo = MapInt, Int val categoricalFeaturesInfo: scala.collection.immutable.Map[Int,Int] = Map()
+
+scala> val numTrees = 3 val numTrees: Int = 3
+
+// Use more in practice.
+
+scala> val featureSubsetStrategy = "auto" val featureSubsetStrategy: String = auto
+
+// Let the algorithm choose.
+
+scala> val impurity = "gini" val impurity: String = gini
+
+scala> val maxDepth = 4 val maxDepth: Int = 4
+
+scala> val maxBins = 32 val maxBins: Int = 32
+
+scala> val model = RandomForest.trainClassifier( trainingData, numClasses, categoricalFeaturesInfo, numTrees, featureSub setStrategy, impurity, maxDepth, maxBins ) val model: org.apache.spark.mllib.tree.model.RandomForestModel = TreeEnsembleModel classifier with 3 trees
+
+scala>
+
+// Evaluate model on test instances and compute test error
+
+scala> val labelAndPreds = testData.map { point => | val prediction = model.predict(point.features) | (point.label, prediction) | } val labelAndPreds: org.apache.spark.rdd.RDD[(Double, Double)] = MapPartitionsRDD[53] at map at :1
+
+scala> val testErr = labelAndPreds val testErr: org.apache.spark.rdd.RDD[(Double, Double)] = MapPartitionsRDD[53] at map at :1
+
+scala> .filter { case (label, pred) => label != pred } val res6: org.apache.spark.rdd.RDD[(Double, Double)] = MapPartitionsRDD[54] at filter at :1
+
+scala> .count() val res7: Long = 0
+
+scala> .toDouble / testData.count() val res8: Double = 0.0
+
+scala> println(s"Test Error = $testErr") Test Error = MapPartitionsRDD[53] at map at :1
+
+scala> println(s"Learned classification forest model:\n ${model.toDebugString}") Learned classification forest model: TreeEnsembleModel classifier with 3 trees
+
+Tree 0: If (feature 433 <= 52.5) If (feature 597 <= 253.5) Predict: 0.0 Else (feature 597 > 253.5) Predict: 1.0 Else (feature 433 > 52.5) Predict: 1.0 Tree 1: If (feature 511 <= 1.5) If (feature 411 <= 36.0) Predict: 1.0 Else (feature 411 > 36.0) Predict: 0.0 Else (feature 511 > 1.5) Predict: 0.0 Tree 2: If (feature 434 <= 70.5) If (feature 436 <= 1.5) Predict: 0.0 Else (feature 436 > 1.5) Predict: 1.0 Else (feature 434 > 70.5) Predict: 1.0
+
+# Práctica 6 - Naive Bayes
+
+scala> import org.apache.spark.mllib.classification.{NaiveBayes, NaiveBayesModel} import org.apache.spark.mllib.classification.{NaiveBayes, NaiveBayesModel}
+
+scala> import org.apache.spark.mllib.util.MLUtils import org.apache.spark.mllib.util.MLUtils
+
+scala> // Load and parse the data file.
+
+scala> val data = MLUtils.loadLibSVMFile(sc, "./sample_data.txt") val data: org.apache.spark.rdd.RDD[org.apache.spark.mllib.regression.LabeledPoint] = MapPartitionsRDD[6] at map at MLUtils.scala:88
+
+scala> // Split data into training (60%) and test (40%).
+
+scala> val Array(training, test) = data.randomSplit(Array(0.6, 0.4)) val training: org.apache.spark.rdd.RDD[org.apache.spark.mllib.regression.LabeledPoint] = MapPartitionsRDD[7] at randomSplit at :1 val test: org.apache.spark.rdd.RDD[org.apache.spark.mllib.regression.LabeledPoint] = MapPartitionsRDD[8] at randomSplit at :1
+
+scala> val model = NaiveBayes.train(training, lambda = 1.0, modelType = "multinomial") val model: org.apache.spark.mllib.classification.NaiveBayesModel = org.apache.spark.mllib.classification.NaiveBayesModel@40188fe6
+
+scala> val predictionAndLabel = test.map(p => (model.predict(p.features), p.label)) val predictionAndLabel: org.apache.spark.rdd.RDD[(Double, Double)] = MapPartitionsRDD[24] at map at :1
+
+scala> val accuracy = 1.0 * predictionAndLabel.filter(x => x._1 == x._2).count() / test.count() val accuracy: Double = 0.9772727272727273
